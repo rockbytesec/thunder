@@ -1,2 +1,2 @@
 # thunder
-Find web servers of a subdomain list
+Find web servers of a subdomain list quickly
