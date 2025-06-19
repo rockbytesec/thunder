@@ -1,0 +1,5 @@
+# These are the required modules for the project
+
+requests
+urllib3
+tabulate
