@@ -1,5 +1,5 @@
 # thunder
-Find web servers of a subdomain list quickly
+Find web servers of a subdomain list and bruteforce directories - QUICKLY
 
 
 # Usage
