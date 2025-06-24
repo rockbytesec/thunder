@@ -9,7 +9,7 @@ import tqdm
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-heads = {"X-Hackerone-Researcher" : "YOUR_USER_NAME"}
+heads = {"X-HackerOne-Research" : "YOUR_USER_NAME"}
 
 sub_file = str(sys.argv[1])
 output_folder = str(sys.argv[2])
@@ -102,7 +102,7 @@ def perform_http_check(subfile):
 def fetcher(url, payload):
     try:
         fetcher_resp = requests.get(url + "/" + quote(payload), headers=heads, timeout=20)
-        return fetcher_resp
+        return fetcher_resp.status_code
     except requests.exceptions.RequestException as e:
         return "fetcherexception"
 
@@ -116,8 +116,8 @@ def buster(url, wordslist):
             payload = future_words[future].rstrip()
             try:
                 busting_res = future.result()
-                if busting_res != "fetcherexception" and busting_res.status_code not in fake_resp_code:
-                    outdict[url + "/" + quote(payload)] = str(busting_res.status_code)
+                if busting_res != "fetcherexception" and busting_res not in fake_resp_code:
+                    outdict[url + "/" + quote(payload)] = str(busting_res)
             except Exception as e:
                 print(f'Error during {payload} exception: {e}')
     return outdict
