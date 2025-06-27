@@ -17,7 +17,7 @@ output_folder = str(sys.argv[2])
 
 subdomains_list = []
 status_dict = {}
-fake_resp_code = [404]
+blacklist_code = [404]
 
 
 # # # # # # # # # # #
@@ -102,9 +102,9 @@ def perform_http_check(subfile):
 def fetcher(url, payload):
     try:
         fetcher_resp = requests.get(url + "/" + quote(payload), headers=heads, timeout=20)
-        return fetcher_resp.status_code
+        return fetcher_resp.status_code, len(fetcher_resp.content)
     except requests.exceptions.RequestException as e:
-        return "fetcherexception"
+        return "fetcherexception", "fetcherexception"
 
 
 # Buster function works like gobuster
@@ -115,9 +115,9 @@ def buster(url, wordslist):
         for future in tqdm.tqdm(concurrent.futures.as_completed(future_words), total=len(wordslist), leave=False, desc=f'{url} Busting Progress -->'):
             payload = future_words[future].rstrip()
             try:
-                busting_res = future.result()
-                if busting_res != "fetcherexception" and busting_res not in fake_resp_code:
-                    outdict[url + "/" + quote(payload)] = str(busting_res)
+                busting_res, busting_res_len = future.result()
+                if busting_res != "fetcherexception" and busting_res not in blacklist_code:
+                    outdict[url + "/" + quote(payload)] = {'status_code': str(busting_res), 'resp_length': str(busting_res_len)}
             except Exception as e:
                 print(f'Error during {payload} exception: {e}')
     return outdict
@@ -136,9 +136,9 @@ def bustout(url, wordslist):
     # Printing and writing to file
     thisurl = url.replace("://", "-").replace("/", "-")
     outfile = open(output_folder + '/' + thisurl + '.csv', "a", encoding="utf-8")
-    for finalurl, statuscode in outdict.items():
+    for finalurl, resp_out in outdict.items():
         try:
-            outfile.write(finalurl + "," + statuscode + '\n')
+            outfile.write(finalurl + "," + resp_out['status_code'] + "," + resp_out['resp_length'] + '\n')
         except IOError as e:
             print(f'Error writing to file {thisurl}.csv: {e}')
     return True
